@@ -1,6 +1,8 @@
 HELP.md
 target/
-!target/Green_Computing_CSE407-0.0.1-SNAPSHOT.jar
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
 ### STS ###
 .apt_generated
