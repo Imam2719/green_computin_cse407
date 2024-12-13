@@ -1,80 +1,77 @@
 package com.example.Green_Computing_CSE407.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
-import java.io.FileReader;
-import java.io.IOException;
+import javax.annotation.PostConstruct;
+import java.io.*;
 import java.util.*;
-import java.io.File;
-import java.nio.file.Paths;
 
 @Controller
 public class MainController {
 
     private static final Map<String, DatasetInfo> DATASETS = new HashMap<>();
-    private static final String STATIC_DIR = "src/main/resources/static/";
+    
+    @Autowired
+    private ResourceLoader resourceLoader;
 
-    static {
-        initializeDatasets();
-    }
-
-    private static void initializeDatasets() {
-        // Create File object for the static directory
-        File staticDir = new File(STATIC_DIR);
-
-        // Check if directory exists and is readable
-        if (staticDir.exists() && staticDir.isDirectory()) {
-            // Filter for CSV files
-            File[] csvFiles = staticDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv"));
-
-            if (csvFiles != null) {
-                for (File csvFile : csvFiles) {
-                    String fileName = csvFile.getName();
-                    String fileKey = fileName.substring(0, fileName.lastIndexOf('.')).toLowerCase();
-
-                    // Create dataset info based on file name
-                    String displayName = fileName; // Use original filename for display
-                    String description = "Data from " + fileName;
-                    String icon = determineIconFromFileName(fileName);
-
-                    DATASETS.put(fileKey, new DatasetInfo(
-                            displayName,
-                            STATIC_DIR + fileName,
-                            description,
-                            icon,
-                            getColumnsFromCSV(STATIC_DIR + fileName)
-                    ));
+    @PostConstruct
+    private void initializeDatasets() {
+        try {
+            Resource resource = resourceLoader.getResource("classpath:static/");
+            File staticDir = resource.getFile();
+            
+            if (staticDir.exists() && staticDir.isDirectory()) {
+                File[] csvFiles = staticDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv"));
+                
+                if (csvFiles != null) {
+                    for (File csvFile : csvFiles) {
+                        String fileName = csvFile.getName();
+                        String fileKey = fileName.substring(0, fileName.lastIndexOf('.')).toLowerCase();
+                        
+                        Resource csvResource = resourceLoader.getResource("classpath:static/" + fileName);
+                        DATASETS.put(fileKey, new DatasetInfo(
+                                fileName,
+                                csvResource.getFile().getPath(),
+                                "Data from " + fileName,
+                                determineIconFromFileName(fileName),
+                                getColumnsFromCSV(csvResource.getInputStream())
+                        ));
+                    }
                 }
             }
-        }
-
-        // If no CSV files were found, add default datasets as fallback
-        if (DATASETS.isEmpty()) {
-            DATASETS.put("netlab", new DatasetInfo(
-                    "new_netLab.csv",
-                    STATIC_DIR + "new_netLab.csv",
-                    "Network traffic and usage patterns from our lab environment",
-                    "chart-bar",
-                    new String[]{"timestamp", "network_usage", "bandwidth"}
-            ));
-
-            DATASETS.put("powerusage", new DatasetInfo(
-                    "pc_ups_netLab.csv",
-                    STATIC_DIR + "pc_ups_netLab.csv",
-                    "Detailed power consumption metrics across different devices",
-                    "bolt",
-                    new String[]{"timestamp", "power_consumption", "voltage"}
-            ));
+        } catch (IOException e) {
+            e.printStackTrace();
+            addFallbackDatasets();
         }
     }
 
-    private static String[] getColumnsFromCSV(String filePath) {
-        try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
+    private void addFallbackDatasets() {
+        DATASETS.put("netlab", new DatasetInfo(
+                "new_netLab.csv",
+                "classpath:static/new_netLab.csv",
+                "Network traffic and usage patterns from our lab environment",
+                "chart-bar",
+                new String[]{"timestamp", "network_usage", "bandwidth"}
+        ));
+
+        DATASETS.put("powerusage", new DatasetInfo(
+                "pc_ups_netLab.csv",
+                "classpath:static/pc_ups_netLab.csv",
+                "Detailed power consumption metrics across different devices",
+                "bolt",
+                new String[]{"timestamp", "power_consumption", "voltage"}
+        ));
+    }
+
+    private static String[] getColumnsFromCSV(InputStream inputStream) {
+        try (CSVReader reader = new CSVReader(new InputStreamReader(inputStream))) {
             String[] headers = reader.readNext();
             return headers != null ? headers : new String[0];
         } catch (IOException | CsvException e) {
@@ -120,15 +117,16 @@ public class MainController {
         model.addAttribute("datasets", DATASETS);
 
         if (dataset != null && DATASETS.containsKey(dataset)) {
-            try (CSVReader reader = new CSVReader(new FileReader(DATASETS.get(dataset).getFilePath()))) {
-                List<String[]> records = reader.readAll();
+            try {
+                Resource csvResource = resourceLoader.getResource("classpath:static/" + DATASETS.get(dataset).getName());
+                try (CSVReader reader = new CSVReader(new InputStreamReader(csvResource.getInputStream()))) {
+                    List<String[]> records = reader.readAll();
 
-                // Add all data related attributes
-                model.addAttribute("data", records);
-                model.addAttribute("selectedDataset", dataset);
-                model.addAttribute("datasetInfo", DATASETS.get(dataset));
-                model.addAttribute("columns", records.get(0)); // Add column headers
-
+                    model.addAttribute("data", records);
+                    model.addAttribute("selectedDataset", dataset);
+                    model.addAttribute("datasetInfo", DATASETS.get(dataset));
+                    model.addAttribute("columns", records.get(0));
+                }
             } catch (IOException | CsvException e) {
                 e.printStackTrace();
                 model.addAttribute("error", "Error reading CSV file: " + e.getMessage());
@@ -143,11 +141,14 @@ public class MainController {
         model.addAttribute("datasets", DATASETS);
 
         if (dataset != null && DATASETS.containsKey(dataset)) {
-            try (CSVReader reader = new CSVReader(new FileReader(DATASETS.get(dataset).getFilePath()))) {
-                List<String[]> records = reader.readAll();
-                model.addAttribute("data", records);
-                model.addAttribute("selectedDataset", dataset);
-                model.addAttribute("datasetInfo", DATASETS.get(dataset));
+            try {
+                Resource csvResource = resourceLoader.getResource("classpath:static/" + DATASETS.get(dataset).getName());
+                try (CSVReader reader = new CSVReader(new InputStreamReader(csvResource.getInputStream()))) {
+                    List<String[]> records = reader.readAll();
+                    model.addAttribute("data", records);
+                    model.addAttribute("selectedDataset", dataset);
+                    model.addAttribute("datasetInfo", DATASETS.get(dataset));
+                }
             } catch (IOException | CsvException e) {
                 e.printStackTrace();
                 model.addAttribute("error", "Error reading CSV file: " + e.getMessage());
