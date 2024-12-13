@@ -26,8 +26,8 @@ RUN ./mvnw clean package -DskipTests
 # Set Java options
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
-# Expose the port
-EXPOSE 8080
+# Get the PORT environment variable
+ENV PORT=8080
 
-# Run the application
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar target/Green_Computing_CSE407-0.0.1-SNAPSHOT.jar"]
+# Run the application with the PORT environment variable
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar -Dserver.port=${PORT} target/Green_Computing_CSE407-0.0.1-SNAPSHOT.jar"]
