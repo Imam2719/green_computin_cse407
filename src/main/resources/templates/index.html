@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ML for Renewable Energy - Dashboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      zoom: 0.7;
+      -moz-transform: scale(0.7);
+      -moz-transform-origin: 0 0;
+      min-height: 142.85714286vh; /* 100/0.7 to compensate for zoom */
+    }
+
+    .content-wrapper {
+      height: calc(142.85714286vh - 2rem); /* Adjusted for zoom */
+      min-height: 900px;
+    }
+
+    /* Adjust container width to compensate for zoom */
+    .container {
+      max-width: 142.85714286%; /* 100/0.7 */
+      margin: 0 auto;
+    }
+
+    /* Adjust main content margin to compensate for sidebar */
+    .ml-64 {
+      margin-left: 16rem;
+      width: calc(100% - 16rem);
+    }
+
+    /* Hero section adjustments */
+    .h-2\/5 {
+      height: 40vh;
+      min-height: 400px;
+    }
+
+    /* Team section adjustments */
+    .team-member {
+      transition: all 0.3s ease;
+      padding: 2rem;
+    }
+
+    .team-member:hover {
+      transform: scale(1.05);
+    }
+
+    /* Profile image adjustments */
+    .profile-image {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .w-24 {
+      width: 120px;
+    }
+
+    .h-24 {
+      height: 120px;
+    }
+
+    /* Text size adjustments */
+    .text-5xl {
+      font-size: 3.5rem;
+      line-height: 1.2;
+    }
+
+    .text-3xl {
+      font-size: 2rem;
+      line-height: 1.3;
+    }
+
+    .text-xl {
+      font-size: 1.25rem;
+      line-height: 1.4;
+    }
+
+    /* Spacing adjustments */
+    .py-12 {
+      padding-top: 4rem;
+      padding-bottom: 4rem;
+    }
+
+    .px-6 {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+
+    /* Card adjustments */
+    .card-hover {
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Sidebar adjustments */
+    #sidebar {
+      width: 16rem;
+      min-height: 142.85714286vh; /* Adjusted for zoom */
+    }
+
+    /* Media query adjustments */
+    @media (max-width: 768px) {
+      body {
+        zoom: 1;
+        -moz-transform: none;
+        min-height: 100vh;
+      }
+
+      .content-wrapper {
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .ml-64 {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      #sidebar {
+        width: 16rem;
+        min-height: 100vh;
+      }
+    }
+
+    /* Additional zoom handling for different browsers */
+    @supports (-webkit-appearance:none) {
+      body {
+        zoom: 0.7;
+      }
+    }
+
+    @supports (-moz-appearance:none) {
+      body {
+        transform: scale(0.7);
+        transform-origin: 0 0;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 overflow-hidden">
+<!-- Side Navigation -->
+<div class="fixed inset-y-0 left-0 w-64 bg-green-800 text-white transition-transform duration-300 transform z-50" id="sidebar">
+  <div class="flex flex-col h-full">
+    <div class="p-6">
+      <div class="flex items-center space-x-3 mb-8">
+        <div>
+          <h1 class="text-xl font-bold">East West University </h1>
+          <p class="text-sm text-green-200">Aftabnagar,Rampura,Dhaka</p>
+          <p class="text-sm text-green-200">Dhaka</p>
+        </div>
+      </div>
+
+      <nav class="space-y-2">
+        <a href="/" class="nav-link flex items-center space-x-3 p-3 rounded-lg bg-green-700 hover:bg-green-600 transition-colors">
+          <i class="fas fa-home w-6"></i>
+          <span>Home</span>
+        </a>
+        <a href="/overview" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+          <i class="fas fa-chart-pie w-6"></i>
+          <span>Overview</span>
+        </a>
+        <a href="/my-data" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+          <i class="fas fa-database w-6"></i>
+          <span>My Data</span>
+        </a>
+        <a href="/visualization" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+          <i class="fas fa-chart-line w-6"></i>
+          <span>Data Visualization</span>
+        </a>
+        <a href="/sample-input" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+          <i class="fas fa-edit w-6"></i>
+          <span>Sample Predictions</span>
+        </a>
+        <a href="/calculator" class="nav-link flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+          <i class="fas fa-calculator w-6"></i>
+          <span>Energy Calculator</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="mt-auto p-6 bg-green-900">
+      <div class="flex flex-col space-y-2">
+        <div class="flex items-center space-x-3">
+          <i class="fas fa-university text-2xl"></i>
+          <div>
+            <p class="font-medium">Course Details</p>
+          </div>
+        </div>
+        <div class="text-sm text-green-200 space-y-1">
+          <p>Course Code: CSE-407</p>
+          <p>Course Title: Green Computing</p>
+          <p>Section: 01</p>
+          <p>Group No: 13</p>
+          <h6 class="text-xl font-bold">Instructor: Dr. Ahmed Wasif Reza</h6>
+          <p class="text-sm text-green-200"> Professor</p>
+          <p class="text-sm text-green-200"> Department of Computer Science & Engineering</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Toggle Button -->
+<div class="fixed top-4 left-4 z-50 md:hidden">
+  <button onclick="toggleSidebar()" class="bg-green-800 text-white p-3 rounded-lg hover:bg-green-700 transition-colors">
+    <i class="fas fa-bars"></i>
+  </button>
+</div>
+
+<!-- Main Content -->
+<div class="ml-64 content-wrapper overflow-y-auto">
+  <!-- Hero Section -->
+  <div class="h-2/5 bg-gradient-to-r from-green-600 to-green-800 text-white relative overflow-hidden">
+    <div class="absolute inset-0">
+      <div class="absolute inset-0 bg-black opacity-10"></div>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="text-center px-4 hero-text-animation">
+          <h2 class="text-5xl font-bold mb-4">Machine Learning for Optimizing Renewable Energy and Grid Efficiency</h2>
+          <p class="text-xl text-green-100 mb-8 max-w-3xl mx-auto">
+            Pioneering sustainable solutions for a greener tomorrow with advanced machine learning algorithms and renewable energy optimization
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Section -->
+  <div class="bg-white py-12">
+    <div class="container mx-auto px-6">
+      <h3 class="text-3xl font-bold text-center mb-12 gradient-text">Meet Our Team</h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <!-- Team Member 1 -->
+        <div class="team-member bg-gray-50 rounded-xl p-6 text-center">
+          <div class="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-green-500">
+            <img th:src="@{/static/image/1.jpg}" />
+          </div>
+          <h4 class="font-bold text-gray-800 text-lg">Syed Musayedul Hossain</h4>
+          <p class="text-sm text-gray-600 mt-2">2021-2-60-015</p>
+        </div>
+        <!-- Team Member 2 -->
+        <div class="team-member bg-gray-50 rounded-xl p-6 text-center">
+          <div class="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-green-500">
+            <img th:src="@{/static/image/2.jpeg}" />
+          </div>
+          <h4 class="font-bold text-gray-800 text-lg">Nahida Afroz Nowrin</h4>
+          <p class="text-sm text-gray-600 mt-2">2021-1-60-049</p>
+        </div>
+        <!-- Team Member 3 -->
+        <div class="team-member bg-gray-50 rounded-xl p-6 text-center">
+          <div class="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-green-500">
+            <img th:src="@{/static/image/3.jpeg}"/>
+          </div>
+          <h4 class="font-bold text-gray-800 text-lg">MD. Imran Khan</h4>
+          <p class="text-sm text-gray-600 mt-2">2021-3-60-206</p>
+        </div>
+        <!-- Team Member 4 -->
+        <div class="team-member bg-gray-50 rounded-xl p-6 text-center">
+          <div class="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-green-500">
+            <img th:src="@{/static/image/4.jpeg}"/>
+          </div>
+          <h4 class="font-bold text-gray-800 text-lg">Al-Imam Uddin</h4>
+          <p class="text-sm text-gray-600 mt-2">2021-3-60-260</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Grid -->
+  <div class="bg-gray-50 py-12">
+    <div class="container mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- ML Analysis Card -->
+        <div class="card-hover bg-white rounded-xl p-8 flex flex-col justify-between">
+          <div>
+            <div class="text-green-600 mb-6">
+              <i class="fas fa-brain text-4xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">ML Analysis</h3>
+            <p class="text-gray-600 leading-relaxed">Advanced machine learning models for energy consumption prediction</p>
+          </div>
+          <a href="/my-data" class="text-green-600 hover:text-green-700 font-medium inline-flex items-center mt-6 group">
+            View Models
+            <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+          </a>
+        </div>
+
+        <!-- Grid Optimization Card -->
+        <div class="card-hover bg-white rounded-xl p-8 flex flex-col justify-between">
+          <div>
+            <div class="text-green-600 mb-6">
+              <i class="fas fa-plug text-4xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Grid Optimization</h3>
+            <p class="text-gray-600 leading-relaxed">Real-time optimization of energy distribution and grid efficiency</p>
+          </div>
+          <a href="/calculator" class="text-green-600 hover:text-green-700 font-medium inline-flex items-center mt-6 group">
+            Explore Grid
+            <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+          </a>
+        </div>
+
+        <!-- Renewable Integration Card -->
+        <div class="card-hover bg-white rounded-xl p-8 flex flex-col justify-between">
+          <div>
+            <div class="text-green-600 mb-6">
+              <i class="fas fa-solar-panel text-4xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Renewable Integration</h3>
+            <p class="text-gray-600 leading-relaxed">Smart integration of renewable energy sources into the power grid</p>
+          </div>
+          <a href="/visualization" class="text-green-600 hover:text-green-700 font-medium inline-flex items-center mt-6 group">
+            Learn More
+            <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Mobile sidebar toggle functionality
+ function toggleSidebar() {
+     const sidebar = document.getElementById('sidebar');
+     const mainContent = document.getElementById('main-content');
+
+     if (sidebar.style.transform === 'translateX(-100%)') {
+         sidebar.style.transform = 'translateX(0)';
+         mainContent.style.marginLeft = '16rem';
+     } else {
+         sidebar.style.transform = 'translateX(-100%)';
+         mainContent.style.marginLeft = '0';
+     }
+ }
+
+ // Handle responsive layout
+ function handleResize() {
+     const sidebar = document.getElementById('sidebar');
+     const mainContent = document.getElementById('main-content');
+
+     if (window.innerWidth < 768) {
+         sidebar.style.transform = 'translateX(-100%)';
+         mainContent.style.marginLeft = '0';
+     } else {
+         sidebar.style.transform = 'translateX(0)';
+         mainContent.style.marginLeft = '16rem';
+     }
+ }
+
+ // Scroll animation for elements
+ function setupScrollAnimations() {
+     const observer = new IntersectionObserver(
+         (entries) => {
+             entries.forEach(entry => {
+                 if (entry.isIntersecting) {
+                     entry.target.classList.add('opacity-100', 'translate-y-0');
+                     entry.target.classList.remove('opacity-0', 'translate-y-4');
+                 }
+             });
+         },
+         {
+             threshold: 0.1,
+             rootMargin: '0px 0px -50px 0px'
+         }
+     );
+
+     // Observe team members and feature cards
+     document.querySelectorAll('.card-hover, .team-member').forEach((el) => {
+         el.classList.add('opacity-0', 'translate-y-4', 'transition-all', 'duration-700');
+         observer.observe(el);
+     });
+ }
+
+ // Hero section animation
+ function animateHeroSection() {
+     const heroElements = document.querySelectorAll('.hero-text-animation');
+     heroElements.forEach((el, index) => {
+         el.style.animationDelay = `${index * 0.2}s`;
+         el.classList.add('opacity-0');
+         setTimeout(() => {
+             el.classList.remove('opacity-0');
+             el.classList.add('opacity-100');
+         }, 100 + (index * 200));
+     });
+ }
+
+ // Smooth scroll functionality
+ function setupSmoothScroll() {
+     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+         anchor.addEventListener('click', function (e) {
+             e.preventDefault();
+             const target = document.querySelector(this.getAttribute('href'));
+             if (target) {
+                 target.scrollIntoView({
+                     behavior: 'smooth',
+                     block: 'start'
+                 });
+             }
+         });
+     });
+ }
+
+ // Navigation link highlight
+ function highlightCurrentNavLink() {
+     const navLinks = document.querySelectorAll('.nav-link');
+     const currentPath = window.location.pathname;
+
+     navLinks.forEach(link => {
+         const href = link.getAttribute('href');
+         if (href === currentPath) {
+             link.classList.add('bg-green-700');
+         } else {
+             link.classList.remove('bg-green-700');
+         }
+     });
+ }
+
+ // Initialize all functionalities
+ function initializeApp() {
+     // Set up event listeners
+     window.addEventListener('resize', handleResize);
+     window.addEventListener('scroll', () => {
+         requestAnimationFrame(setupScrollAnimations);
+     });
+
+     // Initial setup
+     handleResize();
+     setupScrollAnimations();
+     animateHeroSection();
+     setupSmoothScroll();
+     highlightCurrentNavLink();
+
+     // Add loading animation classes to elements
+     document.querySelectorAll('.card-hover, .team-member').forEach((el) => {
+         el.classList.add('opacity-0', 'translate-y-4', 'transition-all', 'duration-700');
+     });
+ }
+
+ // Run initialization when DOM is loaded
+ document.addEventListener('DOMContentLoaded', initializeApp);
+
+ // Handle page visibility changes
+ document.addEventListener('visibilitychange', () => {
+     if (document.visibilityState === 'visible') {
+         animateHeroSection();
+     }
+ });
+</script>
+</body>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML for Renewable Energy - My Data</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            zoom: 0.7;
+            -moz-transform: scale(0.7);
+            -moz-transform-origin: 0 0;
+            min-height: 142.85714286vh;
+        }
+
+        .content-wrapper {
+            height: calc(142.85714286vh - 2rem);
+            min-height: 900px;
+            overflow-y: auto;
+        }
+
+        .chart-container {
+            height: 400px;
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                zoom: 1;
+                -moz-transform: none;
+                min-height: 100vh;
+            }
+
+            .content-wrapper {
+                height: auto;
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 overflow-hidden">
+<!-- Side Navigation -->
+<div class="fixed inset-y-0 left-0 w-64 bg-green-800 text-white transition-transform duration-300 transform z-50" id="sidebar">
+    <div class="flex flex-col h-full">
+        <div class="p-6">
+            <div class="flex items-center space-x-3 mb-8">
+                <div>
+                    <h1 class="text-xl font-bold">East West University</h1>
+                    <p class="text-sm text-green-200">Aftabnagar,Rampura,Dhaka</p>
+                    <p class="text-sm text-green-200">Dhaka</p>
+                </div>
+            </div>
+
+            <nav class="space-y-2">
+                <a href="/" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-home w-6"></i>
+                    <span>Home</span>
+                </a>
+                <a href="/overview" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-chart-pie w-6"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="/my-data" class="flex items-center space-x-3 p-3 rounded-lg bg-green-700 hover:bg-green-600 transition-colors">
+                    <i class="fas fa-database w-6"></i>
+                    <span>My Data</span>
+                </a>
+                <a href="/visualization" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-chart-line w-6"></i>
+                    <span>Data Visualization</span>
+                </a>
+                <a href="/sample-input" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-edit w-6"></i>
+                    <span>Sample Predictions</span>
+                </a>
+                <a href="/calculator" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-calculator w-6"></i>
+                    <span>Energy Calculator</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="mt-auto p-6 bg-green-900">
+            <div class="flex flex-col space-y-2">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-university text-2xl"></i>
+                    <div>
+                        <p class="font-medium">Course Details</p>
+                    </div>
+                </div>
+                <div class="text-sm text-green-200 space-y-1">
+                    <p>Course Code: CSE-407</p>
+                    <p>Course Title: Green Computing</p>
+                    <p>Section: 01</p>
+                    <p>Group No: 13</p>
+                    <h6 class="text-xl font-bold">Instructor: Dr. Ahmed Wasif Reza</h6>
+                    <p class="text-sm text-green-200">Professor</p>
+                    <p class="text-sm text-green-200">Department of Computer Science & Engineering</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        <div class="mt-auto p-6 bg-green-900">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-user-circle text-2xl"></i>
+                <div>
+                    <p class="font-medium">Welcome</p>
+                    <p class="text-sm text-green-200">Green Computing User</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Toggle Button -->
+<div class="fixed top-4 left-4 z-50 md:hidden">
+    <button onclick="toggleSidebar()" class="bg-green-800 text-white p-3 rounded-lg">
+        <i class="fas fa-bars"></i>
+    </button>
+</div>
+
+<!-- Main Content -->
+<div class="ml-64 content-wrapper" id="main-content">
+    <!-- Dataset Selection View -->
+    <div th:if="${selectedDataset == null}" class="h-full">
+        <div class="bg-gradient-to-r from-green-600 to-green-800 text-white py-10 px-8">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-4">Data Analysis Dashboard</h2>
+                <p class="text-lg text-green-100">Explore and analyze your environmental impact data</p>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-8 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div th:each="dataset : ${datasets}"
+                     class="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300">
+                    <a th:href="@{/my-data(dataset=${dataset.key})}" class="block p-8">
+                        <div class="flex items-center mb-6">
+                            <i th:class="${'fas fa-' + dataset.value.icon + ' text-4xl text-green-600 group-hover:scale-110 transition-transform duration-300'}"></i>
+                            <h3 class="text-2xl font-bold text-gray-800 ml-4" th:text="${dataset.value.name}">Dataset Name</h3>
+                        </div>
+                        <p class="text-gray-600 mb-6" th:text="${dataset.value.description}">Description</p>
+                        <div class="flex items-center text-green-600 font-medium group-hover:translate-x-2 transition-transform duration-300">
+                            Explore Dataset
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data View -->
+    <div th:if="${selectedDataset != null}" class="h-full">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-green-600 to-green-800 text-white py-6 px-8">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <a href="/my-data" class="flex items-center text-green-200 hover:text-white mb-2 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to Datasets
+                        </a>
+                        <h2 class="text-3xl font-bold" th:text="${datasets.get(selectedDataset).name}">Dataset Name</h2>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="exportData()"
+                                class="bg-green-700 hover:bg-green-600 px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-download mr-2"></i>
+                            Export Data
+                        </button>
+                        <button onclick="toggleView()"
+                                class="bg-green-700 hover:bg-green-600 px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-chart-bar mr-2"></i>
+                            Toggle View
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="max-w-7xl mx-auto px-8 py-4 grid grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow p-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">View Type</label>
+                <select id="viewType" onchange="updateView()" class="w-full p-2 border rounded-lg">
+                    <option value="table">Table View</option>
+                    <option value="line">Line Chart</option>
+                    <option value="bar">Bar Chart</option>
+                    <option value="scatter">Scatter Plot</option>
+                </select>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Data Column</label>
+                <select id="dataColumn" onchange="updateView()" class="w-full p-2 border rounded-lg">
+                    <option th:each="header : ${data[0]}"
+                            th:value="${header}"
+                            th:text="${header}">Column</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Data Display -->
+        <div class="max-w-7xl mx-auto px-8 py-4">
+            <!-- Table View -->
+            <div id="tableView" class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th th:each="header : ${data[0]}"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+                                <div class="flex items-center">
+                                    <span th:text="${header}"></span>
+                                    <i class="fas fa-sort ml-2"></i>
+                                </div>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tr th:each="row, rowStat : ${data}" th:if="${rowStat.index > 0}"
+                            class="hover:bg-gray-50 transition-colors">
+                            <td th:each="cell : ${row}"
+                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                [[${cell}]]
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Chart View -->
+            <div id="chartView" class="bg-white rounded-xl shadow-lg p-6 hidden">
+                <div class="chart-container">
+                    <canvas id="dataChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // Global variables for charts and data management
+    let currentChart = null;
+    let currentView = 'table';
+    let rawData = /*[[${data}]]*/ [];
+    let sortDirection = {};
+
+    // Initialize the page
+    function initialize() {
+        if (rawData && rawData.length > 0) {
+            updateView();
+            initializeSortHeaders();
+        }
+
+        // Add event listeners
+        document.getElementById('viewType')?.addEventListener('change', updateView);
+        document.getElementById('dataColumn')?.addEventListener('change', updateView);
+        window.addEventListener('resize', handleResize);
+
+        // Initial setup
+        handleResize();
+    }
+
+    // Initialize sort headers
+    function initializeSortHeaders() {
+        const headers = document.querySelectorAll('th');
+        headers.forEach((header, index) => {
+            header.addEventListener('click', () => sortTable(index));
+            sortDirection[index] = 'none';
+        });
+    }
+
+    // Sort table by column
+    function sortTable(columnIndex) {
+        if (!rawData || rawData.length < 2) return;
+
+        const headers = Array.from(document.querySelectorAll('th'));
+
+        // Update sort direction
+        sortDirection[columnIndex] = sortDirection[columnIndex] === 'asc' ? 'desc' : 'asc';
+
+        // Update sort icons
+        headers.forEach((header, index) => {
+            const icon = header.querySelector('i');
+            if (index === columnIndex) {
+                icon.className = `fas fa-sort-${sortDirection[columnIndex] === 'asc' ? 'up' : 'down'} ml-2`;
+            } else {
+                icon.className = 'fas fa-sort ml-2';
+            }
+        });
+
+        // Sort data
+        const dataToSort = rawData.slice(1);
+        dataToSort.sort((a, b) => {
+            let valueA = a[columnIndex];
+            let valueB = b[columnIndex];
+
+            // Convert to numbers if possible
+            if (!isNaN(valueA) && !isNaN(valueB)) {
+                valueA = parseFloat(valueA);
+                valueB = parseFloat(valueB);
+            }
+
+            if (sortDirection[columnIndex] === 'asc') {
+                return valueA > valueB ? 1 : -1;
+            } else {
+                return valueA < valueB ? 1 : -1;
+            }
+        });
+
+        // Update table with sorted data
+        rawData = [rawData[0], ...dataToSort];
+        updateTableView();
+    }
+
+    // Update table view
+    function updateTableView() {
+        const tbody = document.querySelector('tbody');
+        tbody.innerHTML = '';
+
+        rawData.slice(1).forEach(row => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-gray-50 transition-colors';
+
+            row.forEach(cell => {
+                const td = document.createElement('td');
+                td.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-900';
+                td.textContent = cell;
+                tr.appendChild(td);
+            });
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Update view based on selected options
+    function updateView() {
+        const viewType = document.getElementById('viewType').value;
+        const tableView = document.getElementById('tableView');
+        const chartView = document.getElementById('chartView');
+
+        if (viewType === 'table') {
+            tableView.classList.remove('hidden');
+            chartView.classList.add('hidden');
+            currentView = 'table';
+        } else {
+            tableView.classList.add('hidden');
+            chartView.classList.remove('hidden');
+            updateChart(viewType);
+            currentView = 'chart';
+        }
+    }
+
+    // Update chart visualization
+    function updateChart(chartType) {
+        const ctx = document.getElementById('dataChart').getContext('2d');
+        const selectedColumn = document.getElementById('dataColumn').value;
+
+        if (currentChart) {
+            currentChart.destroy();
+        }
+
+        // Process data for visualization
+        const headers = rawData[0];
+        const columnIndex = headers.indexOf(selectedColumn);
+        const data = rawData.slice(1).map((row, index) => ({
+            x: index,
+            y: parseFloat(row[columnIndex])
+        })).filter(point => !isNaN(point.y));
+
+        // Chart configuration
+        const config = {
+            type: chartType,
+            data: {
+                labels: data.map(d => `Record ${d.x + 1}`),
+                datasets: [{
+                    label: selectedColumn,
+                    data: data.map(d => d.y),
+                    backgroundColor: chartType === 'scatter' ?
+                        'rgb(16, 185, 129)' : 'rgba(52, 211, 153, 0.2)',
+                    borderColor: 'rgb(16, 185, 129)',
+                    borderWidth: 2,
+                    pointRadius: chartType === 'scatter' ? 6 : 2,
+                    pointHoverRadius: 8,
+                    tension: 0.4,
+                    fill: chartType === 'line'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `${selectedColumn}: ${context.parsed.y}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: selectedColumn
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Record Number'
+                        }
+                    }
+                },
+                animation: {
+                    duration: 750,
+                    easing: 'easeInOutQuart'
+                }
+            }
+        };
+
+        currentChart = new Chart(ctx, config);
+    }
+
+    // Export data functionality
+    function exportData() {
+        if (!rawData || rawData.length === 0) return;
+
+        const headers = rawData[0];
+        const csvContent = "data:text/csv;charset=utf-8," +
+            headers.join(",") + "\n" +
+            rawData.slice(1).map(row => row.join(",")).join("\n");
+
+        const link = document.createElement('a');
+        link.href = encodeURI(csvContent);
+        link.target = '_blank';
+        link.download = 'green_computing_data.csv';
+        link.click();
+    }
+
+    // Toggle view functionality
+    function toggleView() {
+        const tableView = document.getElementById('tableView');
+        const chartView = document.getElementById('chartView');
+        const viewTypeSelect = document.getElementById('viewType');
+
+        if (currentView === 'table') {
+            tableView.classList.add('hidden');
+            chartView.classList.remove('hidden');
+            currentView = 'chart';
+            viewTypeSelect.value = 'line';
+            if (!currentChart) {
+                updateChart('line');
+            }
+        } else {
+            tableView.classList.remove('hidden');
+            chartView.classList.add('hidden');
+            currentView = 'table';
+            viewTypeSelect.value = 'table';
+        }
+    }
+
+    // Sidebar toggle functionality
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+
+        if (sidebar.style.transform === 'translateX(-100%)') {
+            sidebar.style.transform = 'translateX(0)';
+            mainContent.style.marginLeft = '16rem';
+        } else {
+            sidebar.style.transform = 'translateX(-100%)';
+            mainContent.style.marginLeft = '0';
+        }
+    }
+
+    // Handle responsive layout
+    function handleResize() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+
+        if (window.innerWidth < 768) {
+            sidebar.style.transform = 'translateX(-100%)';
+            mainContent.style.marginLeft = '0';
+        } else {
+            sidebar.style.transform = 'translateX(0)';
+            mainContent.style.marginLeft = '16rem';
+        }
+
+        // Update chart if exists
+        if (currentChart) {
+            currentChart.resize();
+        }
+    }
+
+    // Start everything when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initialize);
+</script>
+</body>

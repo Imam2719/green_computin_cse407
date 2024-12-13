@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML for Renewable Energy - Data Visualization</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            zoom: 0.7;
+            -moz-transform: scale(0.7);
+            -moz-transform-origin: 0 0;
+            min-height: 142.85714286vh;
+        }
+
+        .content-wrapper {
+            height: calc(142.85714286vh - 2rem);
+            min-height: 900px;
+            overflow-y: auto;
+        }
+
+        .chart-container {
+            height: 400px;
+            position: relative;
+        }
+
+        .chart-type-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chart-type-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .chart-type-card.selected {
+            border: 2px solid rgb(16, 185, 129);
+            background-color: rgba(52, 211, 153, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                zoom: 1;
+                -moz-transform: none;
+                min-height: 100vh;
+            }
+
+            .content-wrapper {
+                height: auto;
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 overflow-hidden">
+<!-- Side Navigation -->
+<div class="fixed inset-y-0 left-0 w-64 bg-green-800 text-white transition-transform duration-300 transform z-50" id="sidebar">
+    <div class="flex flex-col h-full">
+        <div class="p-6">
+            <div class="flex items-center space-x-3 mb-8">
+                <div>
+                    <h1 class="text-xl font-bold">East West University</h1>
+                    <p class="text-sm text-green-200">Aftabnagar,Rampura,Dhaka</p>
+                    <p class="text-sm text-green-200">Dhaka</p>
+                </div>
+            </div>
+
+            <nav class="space-y-2">
+                <a href="/" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-home w-6"></i>
+                    <span>Home</span>
+                </a>
+                <a href="/overview" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-chart-pie w-6"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="/my-data" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-database w-6"></i>
+                    <span>My Data</span>
+                </a>
+                <a href="/visualization" class="flex items-center space-x-3 p-3 rounded-lg bg-green-700 hover:bg-green-600 transition-colors">
+                    <i class="fas fa-chart-line w-6"></i>
+                    <span>Data Visualization</span>
+                </a>
+                <a href="/sample-input" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-edit w-6"></i>
+                    <span>Sample Predictions</span>
+                </a>
+                <a href="/calculator" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-calculator w-6"></i>
+                    <span>Energy Calculator</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="mt-auto p-6 bg-green-900">
+            <div class="flex flex-col space-y-2">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-university text-2xl"></i>
+                    <div>
+                        <p class="font-medium">Course Details</p>
+                    </div>
+                </div>
+                <div class="text-sm text-green-200 space-y-1">
+                    <p>Course Code: CSE-407</p>
+                    <p>Course Title: Green Computing</p>
+                    <p>Section: 01</p>
+                    <p>Group No: 13</p>
+                    <h6 class="text-xl font-bold">Instructor: Dr. Ahmed Wasif Reza</h6>
+                    <p class="text-sm text-green-200">Professor</p>
+                    <p class="text-sm text-green-200">Department of Computer Science & Engineering</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Mobile Toggle Button -->
+<div class="fixed top-4 left-4 z-50 md:hidden">
+    <button onclick="toggleSidebar()" class="bg-green-800 text-white p-3 rounded-lg">
+        <i class="fas fa-bars"></i>
+    </button>
+</div>
+
+<!-- Main Content -->
+<div class="ml-64 content-wrapper" id="main-content">
+    <!-- Dataset Selection View -->
+    <div th:if="${selectedDataset == null}" class="h-full">
+        <div class="bg-gradient-to-r from-green-600 to-green-800 text-white py-10 px-8">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-4">Interactive Data Visualization</h2>
+                <p class="text-lg text-green-100">Select a dataset to explore and analyze patterns</p>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-8 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <a th:each="dataset : ${datasets}"
+                   th:href="@{/visualization(dataset=${dataset.key})}"
+                   class="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300">
+                    <div class="p-8">
+                        <div class="flex items-center mb-6">
+                            <i th:class="${'fas fa-' + dataset.value.icon + ' text-4xl text-green-600 group-hover:scale-110 transition-transform duration-300'}"></i>
+                            <h3 class="text-2xl font-bold text-gray-800 ml-4" th:text="${dataset.value.name}">Dataset Name</h3>
+                        </div>
+                        <p class="text-gray-600 mb-6" th:text="${dataset.value.description}">Description</p>
+                        <div class="flex items-center text-green-600 font-medium group-hover:translate-x-2 transition-transform duration-300">
+                            Explore Visualizations
+                            <i class="fas fa-chart-line ml-2"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualization View -->
+    <div th:if="${selectedDataset != null}" class="h-full">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-green-600 to-green-800 text-white py-8 px-8">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <a href="/visualization" class="flex items-center text-green-200 hover:text-white mb-2 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to Datasets
+                        </a>
+                        <h2 class="text-3xl font-bold mb-2" th:text="${datasets.get(selectedDataset).name}">Dataset Name</h2>
+                        <p class="text-green-100" th:text="${datasets.get(selectedDataset).description}">Description</p>
+                    </div>
+                    <button onclick="exportVisualization()"
+                            class="bg-green-700 hover:bg-green-600 px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Visualization
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Type Selection -->
+        <div class="max-w-7xl mx-auto px-8 py-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Select Visualization Type</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="chart-type-card bg-white rounded-xl shadow-lg p-6 text-center" onclick="selectChartType('line')">
+                    <i class="fas fa-chart-line text-4xl text-green-600 mb-4"></i>
+                    <h4 class="font-bold text-gray-800">Line Chart</h4>
+                    <p class="text-sm text-gray-600 mt-2">Track trends and patterns over time</p>
+                </div>
+                <div class="chart-type-card bg-white rounded-xl shadow-lg p-6 text-center" onclick="selectChartType('bar')">
+                    <i class="fas fa-chart-bar text-4xl text-green-600 mb-4"></i>
+                    <h4 class="font-bold text-gray-800">Bar Chart</h4>
+                    <p class="text-sm text-gray-600 mt-2">Compare values across categories</p>
+                </div>
+                <div class="chart-type-card bg-white rounded-xl shadow-lg p-6 text-center" onclick="selectChartType('scatter')">
+                    <i class="fas fa-braille text-4xl text-green-600 mb-4"></i>
+                    <h4 class="font-bold text-gray-800">Scatter Plot</h4>
+                    <p class="text-sm text-gray-600 mt-2">Analyze relationships between variables</p>
+                </div>
+                <div class="chart-type-card bg-white rounded-xl shadow-lg p-6 text-center" onclick="selectChartType('pie')">
+                    <i class="fas fa-chart-pie text-4xl text-green-600 mb-4"></i>
+                    <h4 class="font-bold text-gray-800">Pie Chart</h4>
+                    <p class="text-sm text-gray-600 mt-2">View composition and proportions</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization Controls -->
+        <div class="max-w-7xl mx-auto px-8 py-6">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">X-Axis Data</label>
+                        <select id="xAxis" onchange="updateVisualization()" class="w-full p-2 border rounded-lg">
+                            <option th:each="column : ${columns}"
+                                    th:value="${column}"
+                                    th:text="${column}">Column</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Y-Axis Data</label>
+                        <select id="yAxis" onchange="updateVisualization()" class="w-full p-2 border rounded-lg">
+                            <option th:each="column : ${columns}"
+                                    th:value="${column}"
+                                    th:text="${column}">Column</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Additional Options</label>
+                        <div class="space-x-4">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" id="showTrendline"
+                                       onchange="updateVisualization()"
+                                       class="rounded text-green-600">
+                                <span class="ml-2 text-sm text-gray-700">Show Trendline</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Display -->
+        <div class="max-w-7xl mx-auto px-8 pb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="chart-container">
+                    <canvas id="visualizationChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-sm text-gray-500">Average</p>
+                    <p class="text-2xl font-bold text-green-600" id="avgValue">-</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-sm text-gray-500">Maximum</p>
+                    <p class="text-2xl font-bold text-green-600" id="maxValue">-</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-sm text-gray-500">Minimum</p>
+                    <p class="text-2xl font-bold text-green-600" id="minValue">-</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-sm text-gray-500">Total Records</p>
+                    <p class="text-2xl font-bold text-green-600" id="totalRecords">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // Global variables
+    let currentChart = null;
+    let selectedChartType = 'line';
+       let rawData = /*[[${data}]]*/ [];
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        if (rawData && rawData.length > 0) {
+            // Set initial chart type
+            selectChartType('line');
+            setupEventListeners();
+        }
+    });
+
+    // Setup event listeners
+    function setupEventListeners() {
+        document.querySelectorAll('.chart-type-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const type = card.querySelector('h4').textContent.toLowerCase().split(' ')[0];
+                selectChartType(type);
+            });
+        });
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+    }
+
+    // Select chart type
+    function selectChartType(type) {
+        selectedChartType = type;
+        document.querySelectorAll('.chart-type-card').forEach(card => {
+            card.classList.remove('selected');
+            if (card.querySelector('h4').textContent.toLowerCase().includes(type)) {
+                card.classList.add('selected');
+            }
+        });
+        updateVisualization();
+    }
+
+    // Update visualization
+    function updateVisualization() {
+        if (!rawData || rawData.length < 2) return;
+
+        const ctx = document.getElementById('visualizationChart').getContext('2d');
+        const xColumn = document.getElementById('xAxis').value;
+        const yColumn = document.getElementById('yAxis').value;
+        const showTrendline = document.getElementById('showTrendline')?.checked || false;
+
+        // Get column indices
+        const headers = rawData[0];
+        const xIndex = headers.indexOf(xColumn);
+        const yIndex = headers.indexOf(yColumn);
+
+        // Process data
+        const processedData = rawData.slice(1).map(row => ({
+            x: row[xIndex],
+            y: parseFloat(row[yIndex])
+        })).filter(point => !isNaN(point.y));
+
+        if (currentChart) {
+            currentChart.destroy();
+        }
+
+        // Create chart configuration
+        const config = {
+            type: selectedChartType === 'area' ? 'line' : selectedChartType,
+            data: {
+                labels: processedData.map(d => d.x),
+                datasets: [{
+                    label: yColumn,
+                    data: processedData.map(d => d.y),
+                    backgroundColor: getBackgroundColor(),
+                    borderColor: getBorderColor(),
+                    borderWidth: 2,
+                    fill: selectedChartType === 'area',
+                    tension: 0.4,
+                    pointRadius: selectedChartType === 'scatter' ? 6 : 2,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: yColumn
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: xColumn
+                        }
+                    }
+                }
+            }
+        };
+
+        // Add trendline if requested
+        if (showTrendline && ['line', 'scatter'].includes(selectedChartType)) {
+            const trendline = calculateTrendline(processedData);
+            config.data.datasets.push({
+                label: 'Trendline',
+                data: trendline,
+                type: 'line',
+                borderColor: 'rgba(239, 68, 68, 0.8)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false,
+                pointRadius: 0
+            });
+        }
+
+        currentChart = new Chart(ctx, config);
+        updateStatistics(processedData.map(d => d.y));
+    }
+
+    // Calculate trendline
+    function calculateTrendline(data) {
+        const xValues = Array.from({length: data.length}, (_, i) => i);
+        const yValues = data.map(d => d.y);
+
+        const xMean = xValues.reduce((a, b) => a + b, 0) / xValues.length;
+        const yMean = yValues.reduce((a, b) => a + b, 0) / yValues.length;
+
+        let numerator = 0;
+        let denominator = 0;
+
+        for (let i = 0; i < data.length; i++) {
+            numerator += (xValues[i] - xMean) * (yValues[i] - yMean);
+            denominator += Math.pow(xValues[i] - xMean, 2);
+        }
+
+        const slope = numerator / denominator;
+        const intercept = yMean - (slope * xMean);
+
+        return data.map((_, i) => slope * i + intercept);
+    }
+
+    // Get background color based on chart type
+    function getBackgroundColor() {
+        if (selectedChartType === 'scatter') {
+            return 'rgb(16, 185, 129)';
+        }
+        if (selectedChartType === 'pie') {
+            return [
+                'rgba(52, 211, 153, 0.8)',
+                'rgba(96, 165, 250, 0.8)',
+                'rgba(251, 146, 60, 0.8)',
+                'rgba(167, 139, 250, 0.8)'
+            ];
+        }
+        return 'rgba(52, 211, 153, 0.2)';
+    }
+
+    // Get border color based on chart type
+    function getBorderColor() {
+        return selectedChartType === 'pie'
+            ? ['rgb(16, 185, 129)', 'rgb(37, 99, 235)', 'rgb(234, 88, 12)', 'rgb(139, 92, 246)']
+            : 'rgb(16, 185, 129)';
+    }
+
+    // Update statistics
+    function updateStatistics(values) {
+        if (!values || values.length === 0) return;
+
+        document.getElementById('avgValue').textContent =
+            (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
+        document.getElementById('maxValue').textContent =
+            Math.max(...values).toFixed(2);
+        document.getElementById('minValue').textContent =
+            Math.min(...values).toFixed(2);
+        document.getElementById('totalRecords').textContent =
+            values.length;
+    }
+
+    // Export visualization
+    function exportVisualization() {
+        if (!currentChart) return;
+
+        const link = document.createElement('a');
+        link.download = 'visualization.png';
+        link.href = currentChart.canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    // Toggle sidebar for mobile
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+
+        if (sidebar.style.transform === 'translateX(-100%)') {
+            sidebar.style.transform = 'translateX(0)';
+            mainContent.style.marginLeft = '16rem';
+        } else {
+            sidebar.style.transform = 'translateX(-100%)';
+            mainContent.style.marginLeft = '0';
+        }
+    }
+
+    // Handle responsive layout
+    function handleResize() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+
+        if (window.innerWidth < 768) {
+            sidebar.style.transform = 'translateX(-100%)';
+            mainContent.style.marginLeft = '0';
+        } else {
+            sidebar.style.transform = 'translateX(0)';
+            mainContent.style.marginLeft = '16rem';
+        }
+
+        if (currentChart) {
+            currentChart.resize();
+        }
+    }
+</script>
+</body>

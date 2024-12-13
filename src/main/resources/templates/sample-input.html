@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML for Renewable Energy - Sample Input</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            zoom: 0.7;
+            -moz-transform: scale(0.7);
+            -moz-transform-origin: 0 0;
+            min-height: 142.85714286vh;
+        }
+
+        .content-wrapper {
+            height: calc(142.85714286vh - 2rem);
+            min-height: 900px;
+            overflow-y: auto;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                zoom: 1;
+                -moz-transform: none;
+                min-height: 100vh;
+            }
+
+            .content-wrapper {
+                height: auto;
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 overflow-hidden">
+<!-- Side Navigation -->
+<div class="fixed inset-y-0 left-0 w-64 bg-green-800 text-white transition-transform duration-300 transform z-50" id="sidebar">
+    <div class="flex flex-col h-full">
+        <div class="p-6">
+            <div class="flex items-center space-x-3 mb-8">
+                <div>
+                    <h1 class="text-xl font-bold">East West University</h1>
+                    <p class="text-sm text-green-200">Aftabnagar,Rampura,Dhaka</p>
+                    <p class="text-sm text-green-200">Dhaka</p>
+                </div>
+            </div>
+
+            <nav class="space-y-2">
+                <a href="/" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-home w-6"></i>
+                    <span>Home</span>
+                </a>
+                <a href="/overview" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-chart-pie w-6"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="/my-data" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-database w-6"></i>
+                    <span>My Data</span>
+                </a>
+                <a href="/visualization" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-chart-line w-6"></i>
+                    <span>Data Visualization</span>
+                </a>
+                <a href="/sample-input" class="flex items-center space-x-3 p-3 rounded-lg bg-green-700 hover:bg-green-600 transition-colors">
+                    <i class="fas fa-edit w-6"></i>
+                    <span>Sample Predictions</span>
+                </a>
+                <a href="/calculator" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-calculator w-6"></i>
+                    <span>Energy Calculator</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="mt-auto p-6 bg-green-900">
+            <div class="flex flex-col space-y-2">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-university text-2xl"></i>
+                    <div>
+                        <p class="font-medium">Course Details</p>
+                    </div>
+                </div>
+                <div class="text-sm text-green-200 space-y-1">
+                    <p>Course Code: CSE-407</p>
+                    <p>Course Title: Green Computing</p>
+                    <p>Section: 01</p>
+                    <p>Group No: 13</p>
+                    <h6 class="text-xl font-bold">Instructor: Dr. Ahmed Wasif Reza</h6>
+                    <p class="text-sm text-green-200">Professor</p>
+                    <p class="text-sm text-green-200">Department of Computer Science & Engineering</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Mobile Toggle Button -->
+<div class="fixed top-4 left-4 z-50 md:hidden">
+    <button onclick="toggleSidebar()" class="bg-green-800 text-white p-3 rounded-lg">
+        <i class="fas fa-bars"></i>
+    </button>
+</div>
+
+<!-- Main Content -->
+<div class="ml-64 content-wrapper" id="main-content">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-green-600 to-green-800 text-white py-8 px-8">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold mb-4">Resource Usage Input</h2>
+            <p class="text-lg text-green-100">Enter your device usage data to visualize energy consumption patterns</p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-8 py-6">
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Input Form -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Enter Device Details</h3>
+                <form id="usageForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Device Type</label>
+                        <select id="deviceType" class="w-full p-3 border rounded-lg focus:ring-green-500 focus:border-green-500"
+                                onchange="updatePowerRating()">
+                            <option value="desktop">Desktop Computer (200W)</option>
+                            <option value="laptop">Laptop (50W)</option>
+                            <option value="server">Server (400W)</option>
+                            <option value="monitor">Monitor (30W)</option>
+                            <option value="printer">Printer (100W)</option>
+                            <option value="custom">Custom Device</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Power Consumption (watts)</label>
+                        <input type="number" id="powerConsumption"
+                               class="w-full p-3 border rounded-lg focus:ring-green-500 focus:border-green-500"
+                               required min="0">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Daily Usage Hours</label>
+                        <input type="number" id="usageHours"
+                               class="w-full p-3 border rounded-lg focus:ring-green-500 focus:border-green-500"
+                               required min="0" max="24">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Usage Pattern</label>
+                        <select id="usagePattern" class="w-full p-3 border rounded-lg focus:ring-green-500 focus:border-green-500">
+                            <option value="constant">Constant Usage</option>
+                            <option value="workday">Work Hours (9AM-5PM)</option>
+                            <option value="nighttime">Night Time (6PM-12AM)</option>
+                            <option value="custom">Custom Pattern</option>
+                        </select>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <button type="submit"
+                                class="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-calculator mr-2"></i>Calculate Impact
+                        </button>
+                        <button type="reset"
+                                class="px-6 bg-gray-200 text-gray-600 py-3 rounded-lg hover:bg-gray-300 transition-colors">
+                            <i class="fas fa-redo-alt mr-2"></i>Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results and Visualization -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Usage Analysis</h3>
+
+                <!-- Results Grid -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <h4 class="text-sm text-gray-600">Daily Energy Use</h4>
+                        <p class="text-2xl font-bold text-green-600" id="dailyEnergy">0 kWh</p>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <h4 class="text-sm text-gray-600">Monthly Cost</h4>
+                        <p class="text-2xl font-bold text-green-600" id="monthlyCost">$0.00</p>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <h4 class="text-sm text-gray-600">Annual Impact</h4>
+                        <p class="text-2xl font-bold text-green-600" id="annualImpact">$0.00</p>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <h4 class="text-sm text-gray-600">Carbon Footprint</h4>
+                        <p class="text-2xl font-bold text-green-600" id="carbonFootprint">0 kg CO₂</p>
+                    </div>
+                </div>
+
+                <!-- Visualization Controls -->
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="font-bold text-gray-700">Usage Pattern Visualization</h4>
+                    <select id="chartType" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="line">Line Chart</option>
+                        <option value="bar">Bar Chart</option>
+                        <option value="area">Area Chart</option>
+                    </select>
+                </div>
+
+                <!-- Chart -->
+                <div class="chart-container">
+                    <canvas id="usageChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Visualizations -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+            <!-- Weekly Pattern -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Weekly Usage Pattern</h3>
+                <div class="chart-container">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Impact Comparison -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Environmental Impact</h3>
+                <div class="chart-container">
+                    <canvas id="impactChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Device power ratings
+    const devicePowers = {
+        desktop: 200,
+        laptop: 50,
+        server: 400,
+        monitor: 30,
+        printer: 100,
+        custom: 0
+    };
+
+    // Usage patterns (24-hour factors)
+    const patterns = {
+        constant: Array(24).fill(1),
+        workday: Array(24).fill(0).map((_, i) => (i >= 9 && i < 17) ? 1 : 0),
+        nighttime: Array(24).fill(0).map((_, i) => (i >= 18 && i < 24) ? 1 : 0),
+        custom: Array(24).fill(0.5)
+    };
+
+    // Chart instances
+    let dailyChart = null;
+    let weeklyChart = null;
+    let impactChart = null;
+
+    // Update power rating based on device selection
+    function updatePowerRating() {
+        const deviceType = document.getElementById('deviceType').value;
+        const powerInput = document.getElementById('powerConsumption');
+        powerInput.value = devicePowers[deviceType];
+        powerInput.readOnly = deviceType !== 'custom';
+    }
+
+    // Calculate impact and update displays
+    function calculateImpact(e) {
+        e.preventDefault();
+
+        const power = parseFloat(document.getElementById('powerConsumption').value);
+        const hours = parseFloat(document.getElementById('usageHours').value);
+        const pattern = document.getElementById('usagePattern').value;
+
+        // Basic calculations
+        const dailyKwh = (power * hours) / 1000;
+        const monthlyKwh = dailyKwh * 30;
+        const annualKwh = monthlyKwh * 12;
+        const monthlyCost = monthlyKwh * 0.12; // Assuming $0.12 per kWh
+        const annualCost = monthlyCost * 12;
+        const carbonFootprint = annualKwh * 0.5; // Assuming 0.5 kg CO2 per kWh
+
+        // Update display values
+        document.getElementById('dailyEnergy').textContent = dailyKwh.toFixed(2) + ' kWh';
+        document.getElementById('monthlyCost').textContent = '$' + monthlyCost.toFixed(2);
+        document.getElementById('annualImpact').textContent = '$' + annualCost.toFixed(2);
+        document.getElementById('carbonFootprint').textContent = carbonFootprint.toFixed(2) + ' kg CO₂';
+
+        // Update all charts
+        updateDailyChart(power, hours, pattern);
+        updateWeeklyChart(dailyKwh);
+        updateImpactChart(carbonFootprint);
+    }
+
+    // Update daily usage chart
+    function updateDailyChart(power, hours, patternType) {
+        const ctx = document.getElementById('usageChart').getContext('2d');
+        const chartType = document.getElementById('chartType').value;
+
+        const basePattern = patterns[patternType];
+        const hourlyData = basePattern.map(factor => (power * factor * (hours/24)) / 1000);
+
+        if (dailyChart) {
+            dailyChart.destroy();
+        }
+
+        dailyChart = new Chart(ctx, {
+            type: chartType === 'area' ? 'line' : chartType,
+            data: {
+                labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                datasets: [{
+                    label: 'Hourly Energy Consumption (kWh)',
+                    data: hourlyData,
+                    fill: chartType === 'area',
+                    backgroundColor: 'rgba(52, 211, 153, 0.2)',
+                    borderColor: 'rgb(16, 185, 129)',
+                    tension: 0.4,
+                    pointRadius: chartType === 'line' ? 4 : 0,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Energy Consumption (kWh)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time of Day'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Update weekly pattern chart
+    function updateWeeklyChart(dailyKwh) {
+        const ctx = document.getElementById('weeklyChart').getContext('2d');
+
+        // Generate weekly pattern
+        const weeklyData = [
+            dailyKwh * 1.2,  // Monday (20% higher than average)
+            dailyKwh * 1.1,  // Tuesday (10% higher)
+            dailyKwh,        // Wednesday (average)
+            dailyKwh * 1.1,  // Thursday (10% higher)
+            dailyKwh * 0.9,  // Friday (10% lower)
+            dailyKwh * 0.6,  // Saturday (40% lower)
+            dailyKwh * 0.5   // Sunday (50% lower)
+        ];
+
+        if (weeklyChart) {
+            weeklyChart.destroy();
+        }
+
+        weeklyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Daily Energy Consumption (kWh)',
+                    data: weeklyData,
+                    backgroundColor: 'rgba(52, 211, 153, 0.6)',
+                    borderColor: 'rgb(16, 185, 129)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Update impact comparison chart
+    function updateImpactChart(carbonFootprint) {
+        const ctx = document.getElementById('impactChart').getContext('2d');
+
+        // Compare with common activities
+        const impactData = {
+            labels: ['Your Device', 'Car Trip (100km)', 'Flight (1hr)', 'Tree Offset'],
+            data: [
+                carbonFootprint,
+                22,  // Average car emissions for 100km
+                90,  // Average 1hr flight emissions
+                -21  // Annual CO2 absorption by one tree
+            ]
+        };
+
+        if (impactChart) {
+            impactChart.destroy();
+        }
+
+        impactChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: impactData.labels,
+                datasets: [{
+                    label: 'Carbon Impact (kg CO₂)',
+                    data: impactData.data,
+                    backgroundColor: impactData.data.map(value =>
+                        value < 0 ? 'rgba(52, 211, 153, 0.6)' : 'rgba(239, 68, 68, 0.6)'
+                    ),
+                    borderColor: impactData.data.map(value =>
+                        value < 0 ? 'rgb(16, 185, 129)' : 'rgb(220, 38, 38)'
+                    ),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Carbon Footprint (kg CO₂)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Sidebar toggle functionality
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+
+        if (sidebar.style.transform === 'translateX(-100%)') {
+            sidebar.style.transform = 'translateX(0)';
+            mainContent.style.marginLeft = '16rem';
+        } else {
+            sidebar.style.transform = 'translateX(-100%)';
+            mainContent.style.marginLeft = '0';
+        }
+    }
+
+    // Handle responsive layout
+    function handleResize() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+
+        if (window.innerWidth < 768) {
+            sidebar.style.transform = 'translateX(-100%)';
+            mainContent.style.marginLeft = '0';
+        } else {
+            sidebar.style.transform = 'translateX(0)';
+            mainContent.style.marginLeft = '16rem';
+        }
+    }
+
+    // Initialize everything
+    function initialize() {
+        // Set up event listeners
+        document.getElementById('usageForm').addEventListener('submit', calculateImpact);
+        document.getElementById('chartType').addEventListener('change', () => {
+            const power = parseFloat(document.getElementById('powerConsumption').value);
+            const hours = parseFloat(document.getElementById('usageHours').value);
+            const pattern = document.getElementById('usagePattern').value;
+            updateDailyChart(power, hours, pattern);
+        });
+
+        document.getElementById('usageForm').addEventListener('reset', () => {
+            setTimeout(() => {
+                updatePowerRating();
+                if (dailyChart) dailyChart.destroy();
+                if (weeklyChart) weeklyChart.destroy();
+                if (impactChart) impactChart.destroy();
+            }, 0);
+        });
+
+        window.addEventListener('resize', handleResize);
+
+        // Initial setup
+        updatePowerRating();
+        handleResize();
+    }
+
+    // Start everything when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initialize);
+</script>
+</body>

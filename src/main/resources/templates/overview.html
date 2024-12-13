@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML for Renewable Energy - Overview</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            zoom: 0.7;
+            -moz-transform: scale(0.7);
+            -moz-transform-origin: 0 0;
+            min-height: 142.85714286vh;
+        }
+
+        .content-wrapper {
+            height: calc(142.85714286vh - 2rem);
+            min-height: 900px;
+            overflow-y: auto;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        .stats-card {
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .best-practices-card {
+            transition: all 0.3s ease;
+        }
+
+        .best-practices-card:hover {
+            transform: scale(1.02);
+        }
+
+        .info-card {
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .resource-link {
+            transition: all 0.3s ease;
+        }
+
+        .resource-link:hover {
+            transform: translateX(5px);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                zoom: 1;
+                -moz-transform: none;
+                min-height: 100vh;
+            }
+
+            .content-wrapper {
+                height: auto;
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 overflow-hidden">
+<!-- Side Navigation -->
+<div class="fixed inset-y-0 left-0 w-64 bg-green-800 text-white transition-transform duration-300 transform z-50" id="sidebar">
+    <div class="flex flex-col h-full">
+        <div class="p-6">
+            <div class="flex items-center space-x-3 mb-8">
+                <div>
+                    <h1 class="text-xl font-bold">East West University</h1>
+                    <p class="text-sm text-green-200">Aftabnagar,Rampura,Dhaka</p>
+                    <p class="text-sm text-green-200">Dhaka</p>
+                </div>
+            </div>
+
+            <nav class="space-y-2">
+                <a href="/" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-home w-6"></i>
+                    <span>Home</span>
+                </a>
+                <a href="/overview" class="flex items-center space-x-3 p-3 rounded-lg bg-green-700 hover:bg-green-600 transition-colors">
+                    <i class="fas fa-chart-pie w-6"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="/my-data" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-database w-6"></i>
+                    <span>My Data</span>
+                </a>
+                <a href="/visualization" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-chart-line w-6"></i>
+                    <span>Data Visualization</span>
+                </a>
+                <a href="/sample-input" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-edit w-6"></i>
+                    <span>Sample Predictions</span>
+                </a>
+                <a href="/calculator" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-calculator w-6"></i>
+                    <span>Energy Calculator</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="mt-auto p-6 bg-green-900">
+            <div class="flex flex-col space-y-2">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-university text-2xl"></i>
+                    <div>
+                        <p class="font-medium">Course Details</p>
+                    </div>
+                </div>
+                <div class="text-sm text-green-200 space-y-1">
+                    <p>Course Code: CSE-407</p>
+                    <p>Course Title: Green Computing</p>
+                    <p>Section: 01</p>
+                    <p>Group No: 13</p>
+                    <h6 class="text-xl font-bold">Instructor: Dr. Ahmed Wasif Reza</h6>
+                    <p class="text-sm text-green-200">Professor</p>
+                    <p class="text-sm text-green-200">Department of Computer Science & Engineering</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Toggle Button -->
+<div class="fixed top-4 left-4 z-50 md:hidden">
+    <button onclick="toggleSidebar()" class="bg-green-800 text-white p-3 rounded-lg hover:bg-green-700 transition-colors">
+        <i class="fas fa-bars"></i>
+    </button>
+</div>
+
+<!-- Main Content -->
+<div class="ml-64 content-wrapper" id="main-content">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-green-600 to-green-800 text-white py-12 px-8">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold mb-4">Green Computing Initiative</h2>
+            <p class="text-xl text-green-100 mb-8">Pioneering sustainable technology solutions for a greener future</p>
+            </div>
+        </div>
+
+
+    <!-- Main Content Section -->
+    <div class="max-w-7xl mx-auto px-8 py-12">
+        <!-- What is Green Computing Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-12">
+            <div class="flex items-center mb-8">
+                <i class="fas fa-leaf text-4xl text-green-600 mr-4"></i>
+                <h3 class="text-2xl font-bold text-gray-800">What is Green Computing?</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <p class="text-gray-600 leading-relaxed">
+                        Green computing, also known as sustainable computing, is the environmentally responsible and eco-friendly use of computers and their resources. It encompasses the design, manufacture, use, and disposal of computing devices to reduce their environmental impact.
+                    </p>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-green-800 mb-2">Key Components</h4>
+                        <ul class="space-y-2 text-green-700">
+                            <li><i class="fas fa-check-circle mr-2"></i>Energy-efficient hardware</li>
+                            <li><i class="fas fa-check-circle mr-2"></i>Sustainable software practices</li>
+                            <li><i class="fas fa-check-circle mr-2"></i>Responsible e-waste management</li>
+                            <li><i class="fas fa-check-circle mr-2"></i>Virtualization technologies</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-xl">
+                    <h4 class="font-semibold text-gray-800 mb-4">Environmental Impact</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-bolt text-green-600"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-medium">Energy Consumption</h5>
+                                <p class="text-sm text-gray-600">Reduces power usage by up to 40%</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-cloud text-green-600"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-medium">Carbon Footprint</h5>
+                                <p class="text-sm text-gray-600">Minimizes greenhouse gas emissions</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-recycle text-green-600"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-medium">Resource Conservation</h5>
+                                <p class="text-sm text-gray-600">Promotes recycling and reuse</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Continuing from Advantages of Green Computing section -->
+        <li><i class="fas fa-check text-green-500 mr-2"></i>Conservation of resources</li>
+        <li><i class="fas fa-check text-green-500 mr-2"></i>Sustainable practices</li>
+        </ul>
+    </div>
+    <div class="info-card bg-white rounded-xl shadow-lg p-6">
+        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-users text-2xl text-purple-600"></i>
+        </div>
+        <h4 class="text-xl font-bold text-gray-800 mb-2">Social Benefits</h4>
+        <ul class="text-gray-600 space-y-2">
+            <li><i class="fas fa-check text-purple-500 mr-2"></i>Enhanced brand image</li>
+            <li><i class="fas fa-check text-purple-500 mr-2"></i>Better workplace health</li>
+            <li><i class="fas fa-check text-purple-500 mr-2"></i>Community leadership</li>
+            <li><i class="fas fa-check text-purple-500 mr-2"></i>Social responsibility</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Green Computing Resources -->
+<div class="bg-white rounded-xl shadow-lg p-8 mb-12">
+    <div class="flex items-center mb-8">
+        <i class="fas fa-book text-4xl text-green-600 mr-4"></i>
+        <h3 class="text-2xl font-bold text-gray-800">Resources & Best Practices</h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="space-y-6">
+            <div class="resource-link bg-gray-50 rounded-lg p-4 hover:bg-gray-100">
+                <h4 class="font-semibold text-gray-800 mb-2">Implementation Guidelines</h4>
+                <ul class="space-y-2 text-gray-600">
+                    <li><i class="fas fa-file-alt mr-2 text-green-600"></i>Energy-efficient hardware selection</li>
+                    <li><i class="fas fa-file-alt mr-2 text-green-600"></i>Power management strategies</li>
+                    <li><i class="fas fa-file-alt mr-2 text-green-600"></i>Data center optimization</li>
+                </ul>
+            </div>
+            <div class="resource-link bg-gray-50 rounded-lg p-4 hover:bg-gray-100">
+                <h4 class="font-semibold text-gray-800 mb-2">Tools & Technologies</h4>
+                <ul class="space-y-2 text-gray-600">
+                    <li><i class="fas fa-tools mr-2 text-green-600"></i>Power monitoring software</li>
+                    <li><i class="fas fa-tools mr-2 text-green-600"></i>Virtualization platforms</li>
+                    <li><i class="fas fa-tools mr-2 text-green-600"></i>Cloud computing solutions</li>
+                </ul>
+            </div>
+        </div>
+        <div class="space-y-6">
+            <div class="resource-link bg-gray-50 rounded-lg p-4 hover:bg-gray-100">
+                <h4 class="font-semibold text-gray-800 mb-2">Certification & Standards</h4>
+                <ul class="space-y-2 text-gray-600">
+                    <li><i class="fas fa-certificate mr-2 text-green-600"></i>ENERGY STAR certification</li>
+                    <li><i class="fas fa-certificate mr-2 text-green-600"></i>EPEAT registration</li>
+                    <li><i class="fas fa-certificate mr-2 text-green-600"></i>ISO 14001 standards</li>
+                </ul>
+            </div>
+            <div class="resource-link bg-gray-50 rounded-lg p-4 hover:bg-gray-100">
+                <h4 class="font-semibold text-gray-800 mb-2">Research & Development</h4>
+                <ul class="space-y-2 text-gray-600">
+                    <li><i class="fas fa-microscope mr-2 text-green-600"></i>Emerging technologies</li>
+                    <li><i class="fas fa-microscope mr-2 text-green-600"></i>Academic publications</li>
+                    <li><i class="fas fa-microscope mr-2 text-green-600"></i>Case studies</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analytics Section -->
+<div class="bg-white rounded-xl shadow-lg p-8 mb-12">
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center">
+            <i class="fas fa-chart-line text-4xl text-green-600 mr-4"></i>
+            <h3 class="text-2xl font-bold text-gray-800">Resource Usage Analytics</h3>
+        </div>
+        <div class="flex space-x-4">
+            <select id="timeRange" class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                <option value="day">Last 24 Hours</option>
+                <option value="week">Last Week</option>
+                <option value="month">Last Month</option>
+            </select>
+            <select id="chartType" class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                <option value="line">Line Chart</option>
+                <option value="bar">Bar Chart</option>
+                <option value="area">Area Chart</option>
+            </select>
+        </div>
+    </div>
+    <div class="chart-container">
+        <canvas id="resourceChart"></canvas>
+    </div>
+</div>
+
+<!-- Approaches to Green Computing -->
+<div class="bg-white rounded-xl shadow-lg p-8 mb-12">
+    <div class="flex items-center mb-8">
+        <i class="fas fa-lightbulb text-4xl text-green-600 mr-4"></i>
+        <h3 class="text-2xl font-bold text-gray-800">Approaches to Green Computing</h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-gray-50 rounded-xl p-6">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-microchip text-blue-600"></i>
+            </div>
+            <h4 class="text-lg font-semibold mb-3">Hardware Design</h4>
+            <ul class="text-gray-600 space-y-2">
+                <li>Energy-efficient processors</li>
+                <li>Power-saving components</li>
+                <li>Sustainable materials</li>
+            </ul>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-6">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-code text-green-600"></i>
+            </div>
+            <h4 class="text-lg font-semibold mb-3">Software Optimization</h4>
+            <ul class="text-gray-600 space-y-2">
+                <li>Efficient algorithms</li>
+                <li>Resource management</li>
+                <li>Green coding practices</li>
+            </ul>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-6">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-server text-purple-600"></i>
+            </div>
+            <h4 class="text-lg font-semibold mb-3">Data Center Design</h4>
+            <ul class="text-gray-600 space-y-2">
+                <li>Cooling optimization</li>
+                <li>Power distribution</li>
+                <li>Space utilization</li>
+            </ul>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-6">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-recycle text-red-600"></i>
+            </div>
+            <h4 class="text-lg font-semibold mb-3">E-Waste Management</h4>
+            <ul class="text-gray-600 space-y-2">
+                <li>Proper disposal methods</li>
+                <li>Recycling programs</li>
+                <li>Component reuse</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Future of Green Computing -->
+<div class="bg-white rounded-xl shadow-lg p-8">
+    <div class="flex items-center mb-8">
+        <i class="fas fa-rocket text-4xl text-green-600 mr-4"></i>
+        <h3 class="text-2xl font-bold text-gray-800">Future of Green Computing</h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center p-6 bg-gray-50 rounded-xl">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-microchip text-2xl text-yellow-600"></i>
+            </div>
+            <h4 class="text-xl font-bold text-gray-800 mb-4">Quantum Computing</h4>
+            <p class="text-gray-600">Next-generation computing solutions with minimal energy consumption and maximum efficiency</p>
+        </div>
+        <div class="text-center p-6 bg-gray-50 rounded-xl">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-brain text-2xl text-blue-600"></i>
+            </div>
+            <h4 class="text-xl font-bold text-gray-800 mb-4">AI Optimization</h4>
+            <p class="text-gray-600">Smart systems that automatically optimize resource usage and energy consumption</p>
+        </div>
+        <div class="text-center p-6 bg-gray-50 rounded-xl">
+            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-network-wired text-2xl text-purple-600"></i>
+            </div>
+            <h4 class="text-xl font-bold text-gray-800 mb-4">Edge Computing</h4>
+            <p class="text-gray-600">Distributed computing approaches that reduce data center load and energy usage</p>
+        </div>
+    </div>
+</div>
+<script>
+    // Mobile sidebar toggle functionality
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+
+        if (sidebar.style.transform === 'translateX(-100%)') {
+            sidebar.style.transform = 'translateX(0)';
+            mainContent.style.marginLeft = '16rem';
+        } else {
+            sidebar.style.transform = 'translateX(-100%)';
+            mainContent.style.marginLeft = '0';
+        }
+    }
+
+    // Handle responsive layout
+    function handleResize() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+
+        if (window.innerWidth < 768) {
+            sidebar.style.transform = 'translateX(-100%)';
+            mainContent.style.marginLeft = '0';
+        } else {
+            sidebar.style.transform = 'translateX(0)';
+            mainContent.style.marginLeft = '16rem';
+        }
+    }
+
+    // Resource Usage Chart
+    let currentChart = null;
+
+    function generateRandomData(length, min, max) {
+        return Array.from({ length }, () =>
+            Math.floor(Math.random() * (max - min + 1)) + min
+        );
+    }
+
+    function getChartData(timeRange) {
+        const data = {
+            day: {
+                labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                values: generateRandomData(24, 30, 100)
+            },
+            week: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                values: generateRandomData(7, 40, 90)
+            },
+            month: {
+                labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+                values: generateRandomData(30, 35, 95)
+            }
+        };
+        return data[timeRange];
+    }
+
+    function getChartOptions(chartType) {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Resource Usage Analytics'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            },
+            animations: {
+                tension: {
+                    duration: 1000,
+                    easing: 'linear',
+                    from: 0.8,
+                    to: 0.2,
+                    loop: false
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        };
+    }
+
+    function updateChart() {
+        const ctx = document.getElementById('resourceChart').getContext('2d');
+        const timeRange = document.getElementById('timeRange').value;
+        const chartType = document.getElementById('chartType').value;
+        const chartData = getChartData(timeRange);
+
+        if (currentChart) {
+            currentChart.destroy();
+        }
+
+        const backgroundColor = 'rgba(52, 211, 153, 0.2)';
+        const borderColor = 'rgb(16, 185, 129)';
+
+        currentChart = new Chart(ctx, {
+            type: chartType === 'area' ? 'line' : chartType,
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Resource Usage',
+                    data: chartData.values,
+                    fill: chartType === 'area',
+                    backgroundColor: chartType === 'bar' ?
+                        chartData.values.map(() => backgroundColor) :
+                        backgroundColor,
+                    borderColor: borderColor,
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointBackgroundColor: borderColor,
+                    pointRadius: chartType === 'line' ? 4 : 0,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: getChartOptions(chartType)
+        });
+    }
+
+    // Progressive loading for performance metrics
+    function animateProgressBars() {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            const target = parseInt(bar.getAttribute('data-target'));
+            let width = 0;
+            const increment = target / 100;
+            const interval = setInterval(() => {
+                if (width >= target) {
+                    clearInterval(interval);
+                } else {
+                    width += increment;
+                    bar.style.width = width + '%';
+                }
+            }, 10);
+        });
+    }
+
+    // Initialize everything
+    function initialize() {
+        // Event listeners
+        window.addEventListener('resize', handleResize);
+        document.getElementById('timeRange').addEventListener('change', updateChart);
+        document.getElementById('chartType').addEventListener('change', updateChart);
+
+        // Initial setup
+        handleResize();
+        updateChart();
+        animateProgressBars();
+
+        // Set up automatic updates for real-time data
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                updateChart();
+            }
+        }, 300000); // Update every 5 minutes if page is visible
+
+        // Add smooth scrolling to internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Initialize tooltips if any
+        const tooltips = document.querySelectorAll('[data-tooltip]');
+        tooltips.forEach(tooltip => {
+            tooltip.addEventListener('mouseover', showTooltip);
+            tooltip.addEventListener('mouseout', hideTooltip);
+        });
+    }
+
+    // Tooltip functionality
+    function showTooltip(e) {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip bg-gray-800 text-white px-2 py-1 rounded absolute text-sm';
+        tooltip.textContent = e.target.getAttribute('data-tooltip');
+        document.body.appendChild(tooltip);
+
+        const rect = e.target.getBoundingClientRect();
+        tooltip.style.top = rect.top - tooltip.offsetHeight - 5 + 'px';
+        tooltip.style.left = rect.left + (rect.width - tooltip.offsetWidth) / 2 + 'px';
+    }
+
+    function hideTooltip() {
+        const tooltips = document.querySelectorAll('.tooltip');
+        tooltips.forEach(t => t.remove());
+    }
+
+    // Handle page visibility changes
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            updateChart();
+        }
+    });
+
+    // Start everything when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initialize);
+
+    // Add smooth scrolling behavior
+    document.addEventListener('scroll', () => {
+        const scrollProgress = document.documentElement.scrollTop /
+            (document.documentElement.scrollHeight - document.documentElement.clientHeight);
+
+        if (scrollProgress > 0.9) {
+            document.querySelector('.scroll-to-top').classList.remove('hidden');
+        } else {
+            document.querySelector('.scroll-to-top').classList.add('hidden');
+        }
+    });
+
+    // Handle dark mode toggle if implemented
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('change', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+            updateChart(); // Refresh chart with new theme colors
+        });
+    }
+</script>
+</body>
