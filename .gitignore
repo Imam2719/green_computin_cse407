@@ -1,6 +1,6 @@
 HELP.md
 target/
-!target/*.jar
+!target/Green_Computing_CSE407-0.0.1-SNAPSHOT.jar
 
 ### STS ###
 .apt_generated
