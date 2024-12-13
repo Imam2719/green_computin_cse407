@@ -1,11 +1,24 @@
 # Use Eclipse Temurin JDK 17 with Alpine Linux as the base image
 FROM eclipse-temurin:17-jdk-alpine
 
+# Install necessary packages
+RUN apk add --no-cache bash
+
 # Set working directory in container
 WORKDIR /app
 
-# Copy the entire project first
-COPY . .
+# Copy the Maven wrapper files first
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
+
+# Give execution permission to mvnw
+RUN chmod +x mvnw
+
+# Download dependencies
+RUN ./mvnw dependency:go-offline
+
+# Copy the rest of the project
+COPY src ./src/
 
 # Build the project
 RUN ./mvnw clean package -DskipTests
